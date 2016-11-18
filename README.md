@@ -2,6 +2,8 @@
 
 基于 [SeetaFace](https://github.com/seetaface/SeetaFaceEngine) 的高性能人脸识别服务, 使用 Golang 与 CPP 混合开发.
 
+> 感谢山世光先生的开源精神, 该项目已成功应用在用户头像上传后的自动对焦.
+
 ![Face](./face_detection.jpg)
 
 # Requirements
