@@ -6,7 +6,7 @@
 
 # Requirements
 
-please install them _yourself_.
+please install them **yourself**. And make sure you are on **LINUX**.
 
 - cmake3
 - opencv
@@ -15,12 +15,16 @@ please install them _yourself_.
 # Build and Usage
 
 ```
+# 下载 SeetaFace 源码到 /src, 切换到指定版本并进行编译, 该过程需要 cmake3 支持
 make seeta
+# 编译胶水部分 c++ 代码, 提供可供 golang 使用的 c 语法 lib.
 make faced
+# 混合编译 golang/c++ 服务到单独二进制文件
 make goserver
 ```
 
 ```
+# 对服务进行命令行测试
 $ http POST :8090/detection/upload < ./face.jpg
 ```
 
