@@ -5,12 +5,9 @@
 ![Face](./face_detection.jpg)
 
 # Requirements
-
-please install them **yourself**. And make sure you are on **LINUX**.
-
-- cmake3
-- opencv
-- jsoncpp
+- yum install cmake3
+- yum install opencv
+- yum install jsoncpp-devel
 
 # Build and Usage
 
