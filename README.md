@@ -5,9 +5,11 @@
 ![Face](./face_detection.jpg)
 
 # Requirements
-- yum install cmake3
-- yum install opencv
-- yum install jsoncpp-devel
+```shell
+yum install cmake3
+yum install opencv opencv-devel
+yum install jsoncpp-devel
+```
 
 # Build and Usage
 
