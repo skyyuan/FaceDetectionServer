@@ -15,7 +15,7 @@
 
 using namespace std;
 
-extern seeta::FaceDetection detector("/src/SeetaFaceEngine/FaceDetection/model/seeta_fd_frontal_v1.0.bin");
+seeta::FaceDetection detector("/src/SeetaFaceEngine/FaceDetection/model/seeta_fd_frontal_v1.0.bin");
 
 const char* FaceDetect(char* path) {
     detector.SetMinFaceSize(40);

@@ -86,9 +86,8 @@ func HandlerImageBinDetection(w http.ResponseWriter, r *http.Request) {
 	if _, err := io.Copy(f, r.Body); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
-	} else {
-		f.Close()
 	}
+	f.Close()
 
 	fileinfo, err := os.Stat(f.Name())
 	if err != nil {
