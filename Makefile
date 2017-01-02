@@ -7,13 +7,13 @@ seeta/clone:
 	mkdir -p $(SrcDir)
 	cd $(SrcDir) && git clone https://github.com/seetaface/SeetaFaceEngine.git
 	cd $(SrcDir)/SeetaFaceEngine && git checkout $(SeetaCommitID)
-.PHONY: seeta/src/c
+.PHONY: seeta/clone
 
 seeta/build:
 	rm -rf $(SeetaFDSrcDir)/build; mkdir $(SeetaFDSrcDir)/build
 	cd $(SeetaFDSrcDir)/build; $(CMake3) ..; make -j${nproc}
 	cp $(SeetaFDSrcDir)/build/libseeta_facedet_lib.so /lib64/libseeta_facedet_lib.so
-.PHONY: seeta/src/b
+.PHONY: seeta/build
 
 seeta: seeta/clone seeta/build
 .PHONY: seeta
