@@ -12,15 +12,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
+	"sync"
 	"unsafe"
 )
 
 const (
-	Version = "0.0.1"
-	Port    = "8090"
+	Version = "0.0.2"
+	Port    = "8080"
 )
 
 type DetectionResultFace struct {
@@ -35,7 +35,12 @@ type DetectionResult struct {
 	Face []DetectionResultFace `json:"face"`
 }
 
+var mutex sync.Mutex
+
 func FaceDetect(path string) *DetectionResult {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	cpath := C.CString(path)
 	defer C.free(unsafe.Pointer(cpath))
 
@@ -53,30 +58,6 @@ func FaceDetect(path string) *DetectionResult {
 // ============================================================================
 // HTTP Server
 // ============================================================================
-
-type Handler struct {
-	mux map[string]func(http.ResponseWriter, *http.Request)
-}
-
-func NewHandler() *Handler {
-	Handler := &Handler{}
-	Handler.mux = make(map[string]func(http.ResponseWriter, *http.Request))
-	return Handler
-}
-
-func (Handler *Handler) Bind(pattern string, handler func(w http.ResponseWriter, r *http.Request)) {
-	Handler.mux[pattern] = handler
-}
-
-func (Handler *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h, ok := Handler.mux[r.URL.String()]; ok {
-		log.Println(r.Method, r.URL.String())
-		h(w, r)
-		return
-	}
-	w.WriteHeader(404)
-}
-
 func HandlerRoot(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(200)
@@ -85,26 +66,29 @@ func HandlerRoot(w http.ResponseWriter, r *http.Request) {
 		"<center>FaceDetectServer/%s</center>", Version)))
 }
 
-func HandlerDetectionUpload(w http.ResponseWriter, r *http.Request) {
+func HandlerImageBinDetection(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" && r.Method != "PUT" {
-		w.WriteHeader(405)
+		http.Error(w, "", 405)
 		return
 	}
 	defer r.Body.Close()
 
-	f, err := ioutil.TempFile("", "fdserver_")
+	f, err := ioutil.TempFile("", "fd_")
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	_, err = io.Copy(f, r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
+	defer func() {
 		f.Close()
+		os.Remove(f.Name())
+	}()
+
+	if _, err := io.Copy(f, r.Body); err != nil {
+		http.Error(w, err.Error(), 500)
 		return
+	} else {
+		f.Close()
 	}
-	f.Close()
-	defer os.Remove(f.Name())
 
 	fileinfo, err := os.Stat(f.Name())
 	if err != nil {
@@ -112,30 +96,23 @@ func HandlerDetectionUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if fileinfo.Size() > 1024*1024*8 {
-		http.Error(w, "File size limit exceeded [8MB]", 400)
+		http.Error(w, "File size limit exceeded [8MB]", 413)
 		return
 	}
 
 	dr := FaceDetect(f.Name())
 	if dr.Size[0] == 0 && dr.Size[1] == 0 {
-		w.WriteHeader(400)
-		w.Write([]byte("Invalid file operand"))
+		http.Error(w, "Invalid file operand", 400)
 		return
 	}
-	drs, _ := json.Marshal(dr)
+	drctx, _ := json.Marshal(dr)
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(drs))
+	w.Write([]byte(drctx))
 	return
 }
 
 func main() {
-	Handler := NewHandler()
-	Handler.Bind("/", HandlerRoot)
-	Handler.Bind("/detection/upload", HandlerDetectionUpload)
-	server := http.Server{
-		Addr:    ":" + Port,
-		Handler: Handler,
-	}
-	server.ListenAndServe()
+	http.HandleFunc("/", HandlerRoot)
+	http.HandleFunc("/image/bin/detection", HandlerImageBinDetection)
+	http.ListenAndServe(":"+Port, nil)
 }

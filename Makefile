@@ -33,7 +33,6 @@ faced:
 
 goserver:
 	go build server.go
-	./server
 .PHONY: goserver
 
 clean:

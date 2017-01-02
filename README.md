@@ -5,26 +5,24 @@
 ![Face](./face_detection.jpg)
 
 # Requirements
-```shell
-yum install cmake3
-yum install opencv opencv-devel
-yum install jsoncpp-devel
+
+```sh
+$ yum install cmake3
+$ yum install opencv opencv-devel
+$ yum install jsoncpp-devel
 ```
 
 # Build and Usage
 
-```
-# 下载 SeetaFace 源码到 /src, 切换到指定版本并进行编译, 该过程需要 cmake3 支持
-make seeta
-# 编译胶水部分 c++ 代码, 提供可供 golang 使用的 c 语法 lib.
-make faced
-# 混合编译 golang/c++ 服务到单独二进制文件
-make goserver
+```sh
+$ make seeta    # 下载 SeetaFace 源码到 /src, 切换到指定版本并进行编译, 该过程需要 cmake3 支持
+$ make faced    # 编译胶水部分 c++ 代码, 提供可供 golang 使用的 c 语法 lib.
+$ make goserver # 混合编译 golang/c++ 服务到单独二进制文件
 ```
 
-```
-# 对服务进行命令行测试
-$ http POST :8090/detection/upload < ./face.jpg
+```sh
+$ ./server                                         # 启动 HTTP 服务
+$ http POST :8080/image/bin/detection < ./face.jpg # 对服务进行命令行测试
 ```
 
 ```json
@@ -48,5 +46,3 @@ Date: Wed, 12 Oct 2016 02:47:09 GMT
     ]
 }
 ```
-
-> 感谢山世光先生的开源精神
